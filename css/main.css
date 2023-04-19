@@ -1,0 +1,91 @@
+* { 
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+.full-page {
+    width: 100vw;
+    height: 100vh;
+    background-color: #57C5B6;
+    position: relative;
+}
+.game {
+    position: absolute;
+    width: 600px;
+    height: 600px ;
+    background-color: bisque;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+}
+.game .row {
+    width: 100%;
+    height: calc(100% / 8);
+    display: flex;
+}
+
+.game .row .column {
+    width: calc(100% / 8);
+    height: 100%;
+    border: 1px solid white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    cursor: pointer;
+}
+.game .row svg {
+    color: #57C5B6;
+}
+
+.game .row .column.odd {
+    background-color: #F3DEBA ;
+}
+.game .row .column.even {
+    background-color: #ABC4AA;
+}
+.game .row .column.selected {
+    background-color: #F8F676;
+    /* pointer-events: none; */
+}
+
+.game .row .column.second-choice {
+    /* background-color: red; */
+    pointer-events: none;
+}
+
+/* Start of pieces */
+span::before {
+    font-family: "Font Awesome 6 Free";
+    font-weight: 800;
+    font-size: 50px;
+}
+
+.pawn > span::before {
+    content: "\f443";
+}
+
+.bishop > span::before {
+    content: "\f43a";
+}
+
+.knight > span::before {
+    content: "\f441";
+}
+
+.rook > span::before {
+    content: "\f447";
+}
+
+.queen > span::before {
+    content: "\f445";
+}
+
+.king > span::before {
+    content: "\f43f";
+}
+
+.second-player span {
+    color: #3F51B5;
+}
+/* End of pieces */
