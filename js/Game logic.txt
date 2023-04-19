@@ -28,10 +28,7 @@
 
 
 
-
-
-
 Side functions: 
 [1] detectOpponent()
 [2] switchCurrentTurn()
-[3] setXY
+[3] setXY()
