@@ -168,13 +168,7 @@ function moving(box) {
             console.log("Can't press here now");  
         }
 
-    // if the div empty do nothing
-
-    // if the div contains pawn do pawn function
-    // console.log(`x=${box.getAttribute("data-x")} y= ${box.getAttribute("data-y")}`);
 }
-  
-
 
 // Start Pieces Logic where x y the current position and x2 y2 the target position
 
