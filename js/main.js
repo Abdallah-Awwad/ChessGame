@@ -1,22 +1,19 @@
 // Selected Pieces Counter
 let selectedPieces = 0;
+
 // contains all chess pieces' names 
-let piecesNames = ["pawn", "queen", "king", "bishop", "rook", "knight"];
+let piecesNames = ["queen", "king", "pawn", "bishop", "rook", "knight"];
 
 // contains all board boxes
 let boxes = document.querySelectorAll(".game .column");
 
 let xAxis = [], yAxis = [];
 
-let findNextMoveXY = `[data-x="${xAxis[1]}"][data-y="${yAxis[1]}"]`;
-let findCurrentMoveXY = document.querySelector(`[data-x="${xAxis[0]}"][data-y="${yAxis[0]}"]`);
-let findCurrentX = document.querySelector(`[data-x="${xAxis[0]}"]`);
-
 // defining which player turn is it
 let currentTurn = "first-player";
 
 // switching the turn
-function SwitchcurrentTurn() {
+function switchCurrentTurn() {
     currentTurn == "first-player" ? currentTurn = "second-player" : currentTurn = "first-player";
 }
 
@@ -99,10 +96,9 @@ function initiateGame() {
 
             // adding click event 
             boxes[z].addEventListener("click", function(){
-                moving(this);
-              });
-        
-            z++;
+                clickChecker(this);
+            });
+        z++;
         }
     }
 }
@@ -110,7 +106,7 @@ function initiateGame() {
 initiateGame();
 
 // when clicking get me the x and y from the piece
-function moving(box) {
+function clickChecker(box) {
     
     // if it's first selection 
     if (selectedPieces == 0) {
@@ -140,90 +136,135 @@ function moving(box) {
         } 
         
         // if it's second selection 
-        } else if (selectedPieces == 1) {
+    } else if (selectedPieces == 1) {
 
-            xAxis.push(box.getAttribute("data-x"))
-            yAxis.push(box.getAttribute("data-y"))
-            
-            // checking if the second click on the same box 
-            if (xAxis[0] == xAxis[1] && yAxis[0] == yAxis[1]) {
-                
-                // Cancels the movement and reseting the array 
-                document.querySelector(`[data-x="${xAxis[0]}"][data-y="${yAxis[0]}"]`).classList.remove("selected");
-                console.log("Same piece bitch");
-                selectedPieces = 0;
-                return xAxis = [], yAxis = [];
-            }
-            else {
-                // giving values to the array
-
-                console.log("Data sent to pawnLogic");
-                console.log(xAxis, yAxis);
-                // Giving the target position axis to the function
-                pawnLogic();
-            }
-        }
+        // giving values to the array
+        xAxis.push(box.getAttribute("data-x"))
+        yAxis.push(box.getAttribute("data-y"))
         
-        else  {
-            console.log("Can't press here now");  
+        // checking if the second click on the same box 
+        if (xAxis[0] == xAxis[1] && yAxis[0] == yAxis[1]) {
+            
+            // Cancels the movement and reseting the array 
+            document.querySelector(`[data-x="${xAxis[0]}"][data-y="${yAxis[0]}"]`).classList.remove("selected");
+            console.log("Same piece bitch");
+            selectedPieces = 0;
+            return xAxis = [], yAxis = [];
+        } else {
+            // console.log("Data sent to moveValidation");
+            console.log(xAxis, yAxis);
+            moveValidation();
         }
-
+    } else {
+        console.log("Can't press here now");  
+    }
 }
 
 // Start Pieces Logic where x y the current position and x2 y2 the target position
 
-function pawnLogic() {
+function moveValidation() {
     // updating the opponent for later use
     detectOpponent();
-
-    // moving the pawn one step ahead 
-    if ( parseInt(xAxis[0]) == parseInt(xAxis[1]- 1) && parseInt(yAxis[0]) == parseInt(yAxis[1]) && 
-        piecesNames.some(piecesNames => document.querySelector(`[data-x="${xAxis[1]}"][data-y="${yAxis[1]}"]`).classList.contains(piecesNames)) == false   ) {
-
-        console.log("pawn moved one step");
-        // Remove the classed from the current position
-        
-        doAnimation("normalMove");    
-
-        // Make class to the target position and add .moved to the pawn
-        endTurn("pawn");
-    } 
-
     
-    // pawn capturing if there is a opponent piece in the target position
-    else if (parseInt(xAxis[0]) == parseInt(xAxis[1]) - 1 && 
-        document.querySelector(`[data-x="${xAxis[1]}"][data-y="${yAxis[1]}"]`).classList.contains(opponent) == true && 
-        (parseInt(yAxis[0]) == parseInt(yAxis[1]) - 1 || parseInt(yAxis[0]) == parseInt(yAxis[1]) + 1)  
-        ) {
-        
-        doAnimation("capture");    
-        endTurn("pawn");
-
-        
-        /* 
-        if ((x + 1) && (y - 1)) || ((x + 1) && (y + 1)) and have .second-player 
-        6 - 4 can capture from : 
-        
-        7 - 3  
-        7 - 5 
-        */ 
-        }
-
-       // if it's pawn's first move make it two jumps
-       else if (document.querySelector(`[data-x="${xAxis[0]}"][data-y="${yAxis[0]}"]`).classList.contains("moved") == false) {
-           if (parseInt(xAxis[0]) == parseInt(xAxis[1]- 2) && parseInt(yAxis[0]) == parseInt(yAxis[1]) &&
-               piecesNames.some(piecesNames => document.querySelector(`[data-x="${xAxis[1]}"][data-y="${yAxis[1]}"]`).classList.contains(piecesNames)) == false   )
-           {
-               doAnimation("normalMove");
-               endTurn("pawn");
-               console.log("pawn moved two step");
-           } 
-       } 
-
-    else { 
-        console.log("Wrong move"); 
+    // Checking which piece is it so we can call it's rules function
+    for (i = 0; i < piecesNames.length; i++) {
+        if (document.querySelector(`[data-x="${xAxis[0]}"][data-y="${yAxis[0]}"]`).classList.contains(piecesNames[i])) {
+            pieceType = piecesNames[i];
+        } 
     }
-    return xAxis.pop(),yAxis.pop();
+    
+    chessRules(pieceType);
+}
+
+function chessRules(pieceType, valid, moveType) {
+    
+    switch (pieceType) {
+        
+        case "pawn":
+            // if the marked box empty
+            if ( piecesNames.some(piecesNames => document.querySelector(`[data-x="${xAxis[1]}"][data-y="${yAxis[1]}"]`).classList.contains(piecesNames)) == false &&
+                // moving the pawn one step ahead 
+                parseInt(xAxis[0]) == parseInt(xAxis[1]) - 1 && parseInt(yAxis[0]) == parseInt(yAxis[1]) || 
+                // if it's pawn's first move make it two jumps
+                ( document.querySelector(`[data-x="${xAxis[0]}"][data-y="${yAxis[0]}"]`).classList.contains("moved") == false &&
+                parseInt(xAxis[0]) == parseInt(xAxis[1]- 2) && parseInt(yAxis[0]) == parseInt(yAxis[1]) ) )            
+            {
+                valid = "true", moveType ="normalMove";
+                break;
+            } 
+
+            // pawn capturing if there is a opponent piece in the target position
+            else if ( parseInt(xAxis[0]) == parseInt(xAxis[1]) - 1 && 
+                document.querySelector(`[data-x="${xAxis[1]}"][data-y="${yAxis[1]}"]`).classList.contains(opponent) == true && 
+                (parseInt(yAxis[0]) == parseInt(yAxis[1]) - 1 || parseInt(yAxis[0]) == parseInt(yAxis[1]) + 1) ) 
+            {
+                valid ="true", moveType ="capture";
+                break;
+            }
+
+            else {
+                console.log(pieceType);
+                valid ="false";
+                break;
+            }
+            
+        case "bishop":
+            console.log(pieceType);
+            // code here
+            valid ="false", moveType ="capture";
+            break;
+            
+        case "knight":
+            console.log(pieceType);
+            
+            /* 
+            x 5 - y 4 ets
+
+            x7 - y 3 
+
+            x7 - y 5 
+
+            x3 - y 3
+
+            x3 - y 5
+
+            */
+            valid ="true", moveType ="capture";
+            break;
+
+
+        case "rook":
+            console.log(pieceType);
+
+        // code here
+        valid ="true", moveType ="capture";
+        break;
+
+
+        case "queen":
+            console.log(pieceType);
+
+            // code here
+            valid ="true", moveType ="capture";
+            break;
+
+
+        case "king":
+            console.log(pieceType);
+
+            // code here
+            valid ="true", moveType ="capture";
+            break;
+
+    }
+
+    if (valid == "true") {
+        doAnimation(moveType);
+        endTurn(pieceType);
+    } else {
+        console.log("Faaaalse .... etsrf");
+        return xAxis.pop(),yAxis.pop();
+    } 
     
 }
 
@@ -259,7 +300,7 @@ function endTurn(piece) {
         document.body.style.pointerEvents="initial";
     }, "1000");
 
-    SwitchcurrentTurn();
+    switchCurrentTurn();
 
     return xAxis = [], yAxis = [];
 }
@@ -285,7 +326,7 @@ Things to do :
 [3] Checkmate conditions. 
 [4] Detect which turn is it. [ done ]
 [5] If it's second player turn convert the y numerical using function. [ done ]
-[6] fix auto respawn pawns 
+[6] fix auto respawn pawns. [ done ]
 [7] Make the second player logic properly. [ done ]
 [8] Let the user know which boxes he can move to.
 [9] Let the user know which player turn is it.
