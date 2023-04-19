@@ -1,0 +1,15 @@
+[1] initiateGame() starts to initiate the game board: 
+    * placing every piece to it's position on the board as it giving every box class with the piece name and the css file places the piece to the UI.
+    * creating spans to let the css file work properly with it's animation to the piece (when moving a piece it gives bounce animation ... ahead in the code).
+    * addEventListener on click and sending which box clicked to move() function.
+[2] moving() 
+    (1) if it's the first click from the players:
+        * validating player turn.
+        * running the setXY() function to match the player turn's logic.
+        * checking if the player selected a proper chess piece (not empty box or enemy piece).
+        * giving .selected class to the css to give it a background color.
+        * setting the X and Y value in the Array for the first user selected box.
+    (2) if it's the second click from the players:
+        * checking if the second click on the same box and cancels the selection and the array if so.
+
+
