@@ -147,6 +147,7 @@ function clickChecker(box) {
             // console.log("Data sent to moveValidation");
             console.log(yAxis, xAxis);
             moveValidation();
+
         }
     } else {
         console.log("Can't press here now");  
@@ -169,37 +170,41 @@ function moveValidation() {
     chessRules(pieceType);
 }
 
-let testing1, testing2, testing3;
+let oneStepForward, oneStepBackwards, twoStepsBackwards, playerDirection;
 
 function chessRules(pieceType, valid, moveType) {
     
     switch (pieceType) {
         
         case "pawn":
-            // since the pawn moves in only forward .. checking which turn is it to decide the pawn direction.
-            if (currentTurn == "first-player") {
-                testing1 = + 1, testing2 = - 2, testing3 = - 1;
-            }
-            else if (currentTurn == "second-player") {
-                testing1 = - 1, testing2 = + 2, testing3 = + 1;
-            }
-            
-            // if the marked box empty
+            // since the pawn moves only forward .. checking which turn is it to decide the pawn direction.
+            if (currentTurn == "first-player") oneStepForward = + 1, oneStepBackwards = - 1, twoStepsBackwards = - 2;
+            else if (currentTurn == "second-player") oneStepForward = - 1, oneStepBackwards = + 1, twoStepsBackwards = + 2;
+                        
+                // if the marked box empty
             if ( piecesNames.some(piecesNames => document.querySelector(`[data-y="${yAxis[1]}"][data-x="${xAxis[1]}"]`).classList.contains(piecesNames)) == false &&
                 // moving the pawn one step ahead 
-                parseInt(yAxis[0]) + testing1 == parseInt(yAxis[1]) && parseInt(xAxis[0]) == parseInt(xAxis[1]) || 
+                (parseInt(yAxis[0]) + oneStepForward == parseInt(yAxis[1]) && parseInt(xAxis[0]) == parseInt(xAxis[1])) || 
+
+                // if the marked box empty
+                piecesNames.some(piecesNames => document.querySelector(`[data-y="${yAxis[1]}"][data-x="${xAxis[1]}"]`).classList.contains(piecesNames)) == false &&
                 // if it's pawn's first move make it two jumps
-                ( document.querySelector(`[data-y="${yAxis[0]}"][data-x="${xAxis[0]}"]`).classList.contains("moved") == false &&
-                parseInt(yAxis[0]) == parseInt(yAxis[1]) + testing2 && parseInt(xAxis[0]) == parseInt(xAxis[1]) ) )            
+                document.querySelector(`[data-y="${yAxis[0]}"][data-x="${xAxis[0]}"]`).classList.contains("moved") == false &&
+                // making sure no pieces between the current position and the destination  
+                piecesNames.some(piecesNames => document.querySelector
+                    (`[data-y="${Math.abs(parseInt(yAxis[1]) - oneStepForward)}"][data-x="${xAxis[1]}"]`).classList.contains(piecesNames)) == false &&
+
+                // moving the pawn two steps forward
+                parseInt(yAxis[0]) == parseInt(yAxis[1]) + twoStepsBackwards && parseInt(xAxis[0]) == parseInt(xAxis[1]) )            
             {
                 valid = "true", moveType ="normalMove";
                 break;
             } 
 
             // pawn capturing if there is a opponent piece in the target position
-            else if ( parseInt(yAxis[0]) + testing1 == parseInt(yAxis[1]) && 
+            else if ( parseInt(yAxis[0]) + oneStepForward == parseInt(yAxis[1]) && 
                 document.querySelector(`[data-y="${yAxis[1]}"][data-x="${xAxis[1]}"]`).classList.contains(opponent) == true && 
-                (parseInt(xAxis[0]) + testing1 == parseInt(xAxis[1]) || parseInt(xAxis[0]) + testing3 == parseInt(xAxis[1]) ) ) 
+                (parseInt(xAxis[0]) + oneStepForward == parseInt(xAxis[1]) || parseInt(xAxis[0]) + oneStepBackwards == parseInt(xAxis[1]) ) ) 
             {
                 valid ="true", moveType ="capture";
                 break;
@@ -235,14 +240,12 @@ function chessRules(pieceType, valid, moveType) {
             valid ="true", moveType ="capture";
             break;
 
-
         case "rook":
             console.log(pieceType);
 
         // code here
         valid ="true", moveType ="capture";
         break;
-
 
         case "queen":
             console.log(pieceType);
@@ -336,4 +339,5 @@ Things to do :
 [10] Undo button. 
 [11] Move history. 
 [12] in the pawn logic .. in case jumpe two stteps .. if there is a piece infront of it in the first box .. he can't jump through it.
+[13] Consider the king movement depending on the checkmate conditions.
 */ 
