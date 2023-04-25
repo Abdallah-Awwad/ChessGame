@@ -54,6 +54,15 @@
     pointer-events: none;
 }
 
+.game .row .column span span {
+    position: absolute;
+    left: 0;
+    bottom: 0;
+    font-size: 12px;
+    /* color: red; */
+    /* font-weight: bold; */
+}
+
 /* Start of pieces */
 span::before {
     font-family: "Font Awesome 6 Free";

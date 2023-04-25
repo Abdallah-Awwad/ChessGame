@@ -28,8 +28,8 @@ function setXY() {
     let z = 0;
     for (let y = 8; y > 0; y--) {
         for (x = 1; x < 9; x++) {
-            boxes[z].setAttribute("data-y", y);
             boxes[z].setAttribute("data-x", x);
+            boxes[z].setAttribute("data-y", y);
             z++;
         }
     }
@@ -86,12 +86,14 @@ function initiateGame() {
             // adding black king 
             if (y == 1 && x == 5) boxes[z].classList.add("king", "first-player");
 
+            // adding x and Y for the user in span span 
+            // document.querySelector(`[data-y="${y}"][data-x="${x}"] span`).appendChild(document.createElement("span")).innerHTML = `x${x} y${y}`;
+
             // adding click event 
             boxes[z].addEventListener("click", function(){
                 clickChecker(this);
             });
 
-            
         z++;
         }
     }
@@ -108,8 +110,6 @@ function clickChecker(box) {
         // checing which turn is it and rotating the y and x depending on it to make the logic works fine
         if (box.classList.contains(currentTurn)) {
             
-            console.log("yes u can play");
-    
         } else {
             return console.log("not ur turn") ;
     
@@ -145,7 +145,6 @@ function clickChecker(box) {
             return yAxis = [], xAxis = [];
         } else {
             // console.log("Data sent to moveValidation");
-            console.log(yAxis, xAxis);
             moveValidation();
 
         }
@@ -170,7 +169,7 @@ function moveValidation() {
     chessRules(pieceType);
 }
 
-let oneStepForward, oneStepBackwards, twoStepsBackwards, playerDirection;
+let oneStepForward, oneStepBackwards, twoStepsBackwards;
 
 function chessRules(pieceType, valid, moveType) {
     
@@ -223,32 +222,134 @@ function chessRules(pieceType, valid, moveType) {
             break;
             
         case "knight":
-            console.log(pieceType);
-            
-            /* 
-            y 5 - x 4 ets
+            if ( 
+                parseInt(xAxis[0]) - 1 == parseInt(xAxis[1]) && parseInt(yAxis[0]) + 2 == parseInt(yAxis[1]) || 
+                parseInt(xAxis[0]) + 1 == parseInt(xAxis[1]) && parseInt(yAxis[0]) + 2 == parseInt(yAxis[1]) || 
+                parseInt(xAxis[0]) - 1 == parseInt(xAxis[1]) && parseInt(yAxis[0]) - 2 == parseInt(yAxis[1]) || 
+                parseInt(xAxis[0]) + 1 == parseInt(xAxis[1]) && parseInt(yAxis[0]) - 2 == parseInt(yAxis[1]) || 
+                parseInt(xAxis[0]) - 2 == parseInt(xAxis[1]) && parseInt(yAxis[0]) - 1 == parseInt(yAxis[1]) || 
+                parseInt(xAxis[0]) - 2 == parseInt(xAxis[1]) && parseInt(yAxis[0]) + 1 == parseInt(yAxis[1]) || 
+                parseInt(xAxis[0]) + 2 == parseInt(xAxis[1]) && parseInt(yAxis[0]) - 1 == parseInt(yAxis[1]) || 
+                parseInt(xAxis[0]) + 2 == parseInt(xAxis[1]) && parseInt(yAxis[0]) + 1 == parseInt(yAxis[1])
+                )
+                
+            {
+                // can't move on the same player other pieces.
+                if (piecesNames.some(piecesNames => document.querySelector(`[data-y="${yAxis[1]}"][data-x="${xAxis[1]}"]`).classList.contains(currentTurn)) == true) {
+                    valid ="false";
+                    break;
+                }
+                // if there is an opponent unit ... send capture to the animation
+                else if (document.querySelector(`[data-y="${yAxis[1]}"][data-x="${xAxis[1]}"]`).classList.contains(opponent) == true) {
+                    console.log("capture")
+                    valid ="true", moveType ="capture";
+                    break;
+                } 
+                // Normal move
+                else {
+                    valid ="true", moveType ="normalMove";
+                    break;
+                }
 
-            x7 - x 3 
+            } else { 
+                valid ="false";
+                break;
+            }
 
-            x7 - x 5 
-
-            x3 - x 3
-
-            x3 - x 5
-
+            /* Knight Logic:
+            if the x = 6 ,  y = 5  can capture
+            [1] x = 5       y = 7   ==> case #1 [ done ]
+            [2] x = 7       y = 7   ==> case #2 [ done ]
+            [3] x = 5       y = 3   ==> case #3 [ done ]
+            [4] x = 7       y = 3   ==> case #4 [ done ]
+            [5] x = 4       y = 4   ==> case #5 [ done ]
+            [6] x = 4       y = 6   ==> case #6 [ done ]
+            [7] x = 8       y = 4   ==> case #7 [ done ]
+            [8] x = 8       y = 6   ==> case #8 [ done ]
             */
-            valid ="true", moveType ="capture";
-            break;
 
         case "rook":
-            console.log(pieceType);
 
-        // code here
+        // Guard clauses to remove the unlogical rook movement.
+        if (xAxis[0] !== xAxis[1] && yAxis[0] !== yAxis[1] ) 
+            valid = "false";
+
+        // if the next move contains an ally piece.
+        if (document.querySelector(`[data-y="${yAxis[1]}"][data-x="${xAxis[1]}"]`).classList.contains(currentTurn)) 
+            valid = "false";
+        
+        // determing the direction and breaking if there is a unit between the current position and the destination
+        if (parseInt(xAxis[0]) > parseInt(xAxis[1])) 
+        {
+            for (i = parseInt(xAxis[1]) + 1; i < parseInt(xAxis[0]); i++) {
+                if (piecesNames.some(piecesNames => document.querySelector(`[data-x="${i}"][data-y="${yAxis[0]}"]`).classList.contains(piecesNames))) 
+                    valid = "false";
+            }
+        }
+
+        // determing the direction and breaking if there is a unit between the current position and the destination
+        if (parseInt(yAxis[0]) > parseInt(yAxis[1])) 
+        {
+            for (i = parseInt(yAxis[1]) + 1; i < parseInt(yAxis[0]); i++) {
+                if (piecesNames.some(piecesNames => document.querySelector(`[data-x="${xAxis[0]}"][data-y="${i}"]`).classList.contains(piecesNames))) 
+                    valid = "false";
+            }
+        }
+
+        // determing the direction and breaking if there is a unit between the current position and the destination
+        if (parseInt(xAxis[0]) < parseInt(xAxis[1])) 
+        {
+            for (i = parseInt(xAxis[0]) + 1; i < parseInt(xAxis[1]); i++) {
+                if (piecesNames.some(piecesNames => document.querySelector(`[data-x="${i}"][data-y="${yAxis[0]}"]`).classList.contains(piecesNames))) 
+                    valid = "false";
+            }
+        }
+
+        // determing the direction and breaking if there is a unit between the current position and the destination
+        if (parseInt(yAxis[1]) > parseInt(yAxis[0])) 
+        {
+            for (i = parseInt(yAxis[1]) - 1; i > parseInt(yAxis[0]); i--) {
+                if (piecesNames.some(piecesNames => document.querySelector(`[data-x="${xAxis[0]}"][data-y="${i}"]`).classList.contains(piecesNames))) 
+                    valid = "false";
+            }
+        }
+
+        // if the destination position empty ==> move 
+        if (piecesNames.some(piecesNames => document.querySelector(`[data-x="${xAxis[1]}"][data-y="${yAxis[1]}"]`).classList.contains(piecesNames)) == false && valid !== "false") 
+            valid ="true", moveType ="normalMove";
+
+        // if the destination position has enemy ==> move 
+        if (document.querySelector(`[data-x="${xAxis[1]}"][data-y="${yAxis[1]}"]`).classList.contains(opponent) == true && valid !== "false") 
         valid ="true", moveType ="capture";
+
         break;
+        
+            /* rook Logic:
+            [1] if the x = 4 ,  y = 5  can capture
+                [1] x = 4               y = [any value]   ==> case #1 
+                [2] x = [any value]     y = 5             ==> case #2 
+            [2] check if there is a piece between the two movements.    [ done ]
+            [3] check if the x1 y1 empty.                               [ done ]            
+            [4] check if the x1 y1 have an opponent piece.              [ done ]
+            [5] check if the x1 y1 have an ally piece.                  [ done ]
+            */
 
         case "queen":
             console.log(pieceType);
+
+            /* queen Logic:
+            if the x = 4 ,  y = 5  can capture
+            y[0] = y[1]
+            [1] x =        y =    ==> case #1 
+            [2] x =        y =    ==> case #2 
+            [3] x =        y =    ==> case #3 
+            [4] x =        y =    ==> case #4 
+            [5] x =        y =    ==> case #5 
+            [6] x =        y =    ==> case #6 
+            [7] x =        y =    ==> case #7 
+            [8] x =        y =    ==> case #8 
+            */
+
 
             // code here
             valid ="true", moveType ="capture";
@@ -271,7 +372,6 @@ function chessRules(pieceType, valid, moveType) {
         console.log("Faaaalse .... etsrf");
         return yAxis.pop(),xAxis.pop();
     } 
-    
 }
 
 // End Pieces Logic
@@ -338,6 +438,6 @@ Things to do :
 [9] Let the user know which player turn is it.
 [10] Undo button. 
 [11] Move history. 
-[12] in the pawn logic .. in case jumpe two stteps .. if there is a piece infront of it in the first box .. he can't jump through it.
+[12] in the pawn logic .. in case jumpe two stteps .. if there is a piece infront of it in the first box .. he can't jump through it. [ done ]
 [13] Consider the king movement depending on the checkmate conditions.
 */ 
