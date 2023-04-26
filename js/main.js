@@ -154,7 +154,6 @@ function clickChecker(box) {
 }
 
 // Start Pieces Logic where y x the current position and x2 y2 the target position
-
 function moveValidation() {
     // updating the opponent for later use
     detectOpponent();
@@ -169,10 +168,12 @@ function moveValidation() {
     chessRules(pieceType);
 }
 
-let oneStepForward, oneStepBackwards, twoStepsBackwards;
+let oneStepForward, oneStepBackwards, twoStepsBackwards, stepX, stepY, valid, moveType;
 
-function chessRules(pieceType, valid, moveType) {
-    
+function chessRules(pieceType) {
+
+    valid ="", moveType = "";
+
     switch (pieceType) {
         
         case "pawn":
@@ -216,10 +217,59 @@ function chessRules(pieceType, valid, moveType) {
         }
             
         case "bishop":
-            console.log(pieceType);
-            // code here
-            valid ="false", moveType ="capture";
+
+            stepX = parseInt(xAxis[1]) - parseInt(xAxis[0]);
+            stepY = parseInt(yAxis[1]) - parseInt(yAxis[0]);
+
+            // if it's not a proper move, getout of the conditions. ( Guard clause)
+            if (Math.abs(stepX) !== Math.abs(stepY)) { 
+                valid= "false";
+                break;
+            }
+
+            // we got 4 dimensions and giving each dimension it's formula ... sadly. #1
+            if (xAxis[0] > xAxis[1] && yAxis[0] > yAxis[1] ) {
+                for (i = parseInt(xAxis[0]) - 1, y = parseInt(yAxis[0]) - 1 ; i > xAxis[1]; i--, y--) {
+                    if (piecesNames.some(piecesNames => document.querySelector(`[data-x="${i}"][data-y="${y}"]`).classList.contains(piecesNames))) 
+                        valid = "false";
+                } 
+            }
+
+            // we got 4 dimensions and giving each dimension it's formula ... sadly. #2
+            if (xAxis[0] > xAxis[1] && yAxis[0] < yAxis[1] ) {
+                for (i = parseInt(xAxis[0]) - 1, y = parseInt(yAxis[0]) + 1 ; i > xAxis[1]; i--, y++) {
+                    if (piecesNames.some(piecesNames => document.querySelector(`[data-x="${i}"][data-y="${y}"]`).classList.contains(piecesNames))) 
+                        valid = "false";
+                } 
+            }
+
+            // we got 4 dimensions and giving each dimension it's formula ... sadly. #3
+            if (xAxis[0] < xAxis[1] && yAxis[0] < yAxis[1] ) {
+                for (i = parseInt(xAxis[0]) + 1, y = parseInt(yAxis[0]) + 1 ; i < xAxis[1]; i++, y++) {
+                    if (piecesNames.some(piecesNames => document.querySelector(`[data-x="${i}"][data-y="${y}"]`).classList.contains(piecesNames))) 
+                        valid = "false";
+                } 
+            }
+
+            // we got 4 dimensions and giving each dimension it's formula ... sadly. #4
+            if (xAxis[0] < xAxis[1] && yAxis[0] > yAxis[1] ) {
+                for (i = parseInt(xAxis[0]) + 1, y = parseInt(yAxis[0]) - 1 ; i < xAxis[1]; i++, y--) {
+                    if (piecesNames.some(piecesNames => document.querySelector(`[data-x="${i}"][data-y="${y}"]`).classList.contains(piecesNames)))
+                        valid = "false";
+                } 
+            }
+
+            // calling the Movement Function to approve the move
+            if (valid !== "false") movementCheck();
             break;
+
+            /* Bishop logic: 
+                let x[0]  - x[1] = x
+                let  y[0] - y[1] = y  
+                & if x == y 
+                and there is no piece between the current position and the destination.
+                then the bishop can move.
+            */
             
         case "knight":
             if ( 
@@ -239,12 +289,14 @@ function chessRules(pieceType, valid, moveType) {
                     valid ="false";
                     break;
                 }
+
                 // if there is an opponent unit ... send capture to the animation
                 else if (document.querySelector(`[data-y="${yAxis[1]}"][data-x="${xAxis[1]}"]`).classList.contains(opponent) == true) {
                     console.log("capture")
                     valid ="true", moveType ="capture";
                     break;
                 } 
+                
                 // Normal move
                 else {
                     valid ="true", moveType ="normalMove";
@@ -274,10 +326,6 @@ function chessRules(pieceType, valid, moveType) {
         if (xAxis[0] !== xAxis[1] && yAxis[0] !== yAxis[1] ) 
             valid = "false";
 
-        // if the next move contains an ally piece.
-        if (document.querySelector(`[data-y="${yAxis[1]}"][data-x="${xAxis[1]}"]`).classList.contains(currentTurn)) 
-            valid = "false";
-        
         // determing the direction and breaking if there is a unit between the current position and the destination
         if (parseInt(xAxis[0]) > parseInt(xAxis[1])) 
         {
@@ -314,18 +362,13 @@ function chessRules(pieceType, valid, moveType) {
             }
         }
 
-        // if the destination position empty ==> move 
-        if (piecesNames.some(piecesNames => document.querySelector(`[data-x="${xAxis[1]}"][data-y="${yAxis[1]}"]`).classList.contains(piecesNames)) == false && valid !== "false") 
-            valid ="true", moveType ="normalMove";
+        // calling the Movement Function to approve the move
 
-        // if the destination position has enemy ==> move 
-        if (document.querySelector(`[data-x="${xAxis[1]}"][data-y="${yAxis[1]}"]`).classList.contains(opponent) == true && valid !== "false") 
-        valid ="true", moveType ="capture";
-
+        if (valid !== "false") movementCheck();
         break;
         
             /* rook Logic:
-            [1] if the x = 4 ,  y = 5  can capture
+            [1] if the x = 4 ,  y = 5  can capture                      [ done ]
                 [1] x = 4               y = [any value]   ==> case #1 
                 [2] x = [any value]     y = 5             ==> case #2 
             [2] check if there is a piece between the two movements.    [ done ]
@@ -350,11 +393,9 @@ function chessRules(pieceType, valid, moveType) {
             [8] x =        y =    ==> case #8 
             */
 
-
             // code here
             valid ="true", moveType ="capture";
             break;
-
 
         case "king":
             console.log(pieceType);
@@ -362,7 +403,6 @@ function chessRules(pieceType, valid, moveType) {
             // code here
             valid ="true", moveType ="capture";
             break;
-
     }
 
     if (valid == "true") {
@@ -375,6 +415,21 @@ function chessRules(pieceType, valid, moveType) {
 }
 
 // End Pieces Logic
+
+function movementCheck() {
+    
+    // if the next move contains an ally piece.
+    if (document.querySelector(`[data-y="${yAxis[1]}"][data-x="${xAxis[1]}"]`).classList.contains(currentTurn)) 
+        valid = "false";
+
+    // if the destination position empty ==> move 
+    if (piecesNames.some(piecesNames => document.querySelector(`[data-x="${xAxis[1]}"][data-y="${yAxis[1]}"]`).classList.contains(piecesNames)) == false) 
+        valid = "true", moveType = "normalMove";
+
+    // if the destination position has enemy ==> move 
+    if (document.querySelector(`[data-x="${xAxis[1]}"][data-y="${yAxis[1]}"]`).classList.contains(opponent) == true) 
+        valid = "true", moveType = "capture";
+}
 
 // End Turn function 
 function endTurn(piece) {
@@ -423,7 +478,6 @@ function doAnimation(animationType) {
         
     }, "1000");
 }
-
 
 /* 
 Things to do : 
