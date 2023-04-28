@@ -53,37 +53,37 @@ function initiateGame() {
             // adding second-player pawns 
             if (y == 7) boxes[z].classList.add("pawn", "second-player");
             
-            // adding black pawns 
+            // adding first-player pawns 
             if (y == 2) boxes[z].classList.add("pawn", "first-player");
 
             // adding second-player bishops 
             if (y == 8 && x == 3 || y == 8 && x == 6) boxes[z].classList.add("bishop", "second-player");
 
-            // adding black bishops 
+            // adding first-player bishops 
             if (y == 1 && x == 3 || y == 1 && x == 6) boxes[z].classList.add("bishop", "first-player");
 
             // adding second-player knight 
             if (y == 8 && x == 2 || y == 8 && x == 7) boxes[z].classList.add("knight", "second-player");
 
-            // adding black knight 
+            // adding first-player knight 
             if (y == 1 && x == 2 || y == 1 && x == 7) boxes[z].classList.add("knight", "first-player");
 
             // adding second-player Rook
             if (y == 8 && x == 1 || y == 8 && x == 8) boxes[z].classList.add("rook", "second-player");
 
-            // adding black Rook
+            // adding first-player Rook
             if (y == 1 && x == 1 || y == 1 && x == 8) boxes[z].classList.add("rook", "first-player");
 
             // adding second-player queen 
             if (y == 8 && x == 4) boxes[z].classList.add("queen", "second-player");
 
-            // adding black queen 
+            // adding first-player queen 
             if (y == 1 && x == 4) boxes[z].classList.add("queen", "first-player");
 
             // adding second-player king 
             if (y == 8 && x == 5) boxes[z].classList.add("king", "second-player");
 
-            // adding black king 
+            // adding first-player king 
             if (y == 1 && x == 5) boxes[z].classList.add("king", "first-player");
 
             // adding x and Y for the user in span span 
@@ -218,49 +218,7 @@ function chessRules(pieceType) {
             
         case "bishop":
 
-            stepX = parseInt(xAxis[1]) - parseInt(xAxis[0]);
-            stepY = parseInt(yAxis[1]) - parseInt(yAxis[0]);
-
-            // if it's not a proper move, getout of the conditions. ( Guard clause)
-            if (Math.abs(stepX) !== Math.abs(stepY)) { 
-                valid= "false";
-                break;
-            }
-
-            // we got 4 dimensions and giving each dimension it's formula ... sadly. #1
-            if (xAxis[0] > xAxis[1] && yAxis[0] > yAxis[1] ) {
-                for (i = parseInt(xAxis[0]) - 1, y = parseInt(yAxis[0]) - 1 ; i > xAxis[1]; i--, y--) {
-                    if (piecesNames.some(piecesNames => document.querySelector(`[data-x="${i}"][data-y="${y}"]`).classList.contains(piecesNames))) 
-                        valid = "false";
-                } 
-            }
-
-            // we got 4 dimensions and giving each dimension it's formula ... sadly. #2
-            if (xAxis[0] > xAxis[1] && yAxis[0] < yAxis[1] ) {
-                for (i = parseInt(xAxis[0]) - 1, y = parseInt(yAxis[0]) + 1 ; i > xAxis[1]; i--, y++) {
-                    if (piecesNames.some(piecesNames => document.querySelector(`[data-x="${i}"][data-y="${y}"]`).classList.contains(piecesNames))) 
-                        valid = "false";
-                } 
-            }
-
-            // we got 4 dimensions and giving each dimension it's formula ... sadly. #3
-            if (xAxis[0] < xAxis[1] && yAxis[0] < yAxis[1] ) {
-                for (i = parseInt(xAxis[0]) + 1, y = parseInt(yAxis[0]) + 1 ; i < xAxis[1]; i++, y++) {
-                    if (piecesNames.some(piecesNames => document.querySelector(`[data-x="${i}"][data-y="${y}"]`).classList.contains(piecesNames))) 
-                        valid = "false";
-                } 
-            }
-
-            // we got 4 dimensions and giving each dimension it's formula ... sadly. #4
-            if (xAxis[0] < xAxis[1] && yAxis[0] > yAxis[1] ) {
-                for (i = parseInt(xAxis[0]) + 1, y = parseInt(yAxis[0]) - 1 ; i < xAxis[1]; i++, y--) {
-                    if (piecesNames.some(piecesNames => document.querySelector(`[data-x="${i}"][data-y="${y}"]`).classList.contains(piecesNames)))
-                        valid = "false";
-                } 
-            }
-
-            // calling the Movement Function to approve the move
-            if (valid !== "false") movementCheck();
+            bishopLogic();
             break;
 
             /* Bishop logic: 
@@ -284,24 +242,8 @@ function chessRules(pieceType) {
                 )
                 
             {
-                // can't move on the same player other pieces.
-                if (piecesNames.some(piecesNames => document.querySelector(`[data-y="${yAxis[1]}"][data-x="${xAxis[1]}"]`).classList.contains(currentTurn)) == true) {
-                    valid ="false";
-                    break;
-                }
-
-                // if there is an opponent unit ... send capture to the animation
-                else if (document.querySelector(`[data-y="${yAxis[1]}"][data-x="${xAxis[1]}"]`).classList.contains(opponent) == true) {
-                    console.log("capture")
-                    valid ="true", moveType ="capture";
-                    break;
-                } 
-                
-                // Normal move
-                else {
-                    valid ="true", moveType ="normalMove";
-                    break;
-                }
+                movementCheck();
+                break;
 
             } else { 
                 valid ="false";
@@ -326,45 +268,8 @@ function chessRules(pieceType) {
         if (xAxis[0] !== xAxis[1] && yAxis[0] !== yAxis[1] ) 
             valid = "false";
 
-        // determing the direction and breaking if there is a unit between the current position and the destination
-        if (parseInt(xAxis[0]) > parseInt(xAxis[1])) 
-        {
-            for (i = parseInt(xAxis[1]) + 1; i < parseInt(xAxis[0]); i++) {
-                if (piecesNames.some(piecesNames => document.querySelector(`[data-x="${i}"][data-y="${yAxis[0]}"]`).classList.contains(piecesNames))) 
-                    valid = "false";
-            }
-        }
-
-        // determing the direction and breaking if there is a unit between the current position and the destination
-        if (parseInt(yAxis[0]) > parseInt(yAxis[1])) 
-        {
-            for (i = parseInt(yAxis[1]) + 1; i < parseInt(yAxis[0]); i++) {
-                if (piecesNames.some(piecesNames => document.querySelector(`[data-x="${xAxis[0]}"][data-y="${i}"]`).classList.contains(piecesNames))) 
-                    valid = "false";
-            }
-        }
-
-        // determing the direction and breaking if there is a unit between the current position and the destination
-        if (parseInt(xAxis[0]) < parseInt(xAxis[1])) 
-        {
-            for (i = parseInt(xAxis[0]) + 1; i < parseInt(xAxis[1]); i++) {
-                if (piecesNames.some(piecesNames => document.querySelector(`[data-x="${i}"][data-y="${yAxis[0]}"]`).classList.contains(piecesNames))) 
-                    valid = "false";
-            }
-        }
-
-        // determing the direction and breaking if there is a unit between the current position and the destination
-        if (parseInt(yAxis[1]) > parseInt(yAxis[0])) 
-        {
-            for (i = parseInt(yAxis[1]) - 1; i > parseInt(yAxis[0]); i--) {
-                if (piecesNames.some(piecesNames => document.querySelector(`[data-x="${xAxis[0]}"][data-y="${i}"]`).classList.contains(piecesNames))) 
-                    valid = "false";
-            }
-        }
-
-        // calling the Movement Function to approve the move
-
-        if (valid !== "false") movementCheck();
+        else rookLogic();
+            
         break;
         
             /* rook Logic:
@@ -378,11 +283,19 @@ function chessRules(pieceType) {
             */
 
         case "queen":
-            console.log(pieceType);
 
+            // if it's a rook movement call the rookLogic(), else call bishopLogic()
+            if ( (xAxis[0] == xAxis[1] || yAxis[0] == yAxis[1]) ) {
+                rookLogic();
+                console.log("Rook Move");
+
+            }
+            else bishopLogic(), console.log("BishopLogic");
+
+            break;
+    
             /* queen Logic:
             if the x = 4 ,  y = 5  can capture
-            y[0] = y[1]
             [1] x =        y =    ==> case #1 
             [2] x =        y =    ==> case #2 
             [3] x =        y =    ==> case #3 
@@ -393,18 +306,40 @@ function chessRules(pieceType) {
             [8] x =        y =    ==> case #8 
             */
 
-            // code here
-            valid ="true", moveType ="capture";
-            break;
 
         case "king":
-            console.log(pieceType);
+            if ( 
+                // if it moved one step diagonally
+                Math.abs( parseInt(xAxis[0]) - parseInt(xAxis[1]) ) == 1 && 
+                Math.abs( parseInt(yAxis[0]) - parseInt(yAxis[1]) ) == 1  || 
 
-            // code here
-            valid ="true", moveType ="capture";
+                // if it moved one step vertically
+                Math.abs( parseInt(xAxis[0]) - parseInt(xAxis[1]) ) == 1 && 
+                Math.abs( parseInt(yAxis[0]) - parseInt(yAxis[1]) ) == 0 || 
+                
+                // if it moved one step horizontally
+                Math.abs( parseInt(xAxis[0]) - parseInt(xAxis[1]) ) == 0 && 
+                Math.abs( parseInt(yAxis[0]) - parseInt(yAxis[1]) ) == 1
+
+                )
+                movementCheck();
+
             break;
+
+            /* King Logic:
+            if the x = 4 ,  y = 5  can capture
+            [1] x = 3       y = 6    ==> case #1 
+            [2] x = 4       y = 6    ==> case #2 
+            [3] x = 5       y = 6    ==> case #3 
+            [4] x = 3       y = 5    ==> case #4 
+            [5] x = 5       y = 5    ==> case #5 
+            [6] x = 3       y = 3    ==> case #6 
+            [7] x = 4       y = 3    ==> case #7 
+            [8] x = 5       y = 3    ==> case #8 
+            */
     }
 
+    // what happens after the switch cases
     if (valid == "true") {
         doAnimation(moveType);
         endTurn(pieceType);
@@ -481,17 +416,107 @@ function doAnimation(animationType) {
 
 /* 
 Things to do : 
-[1] Detect if the pawn got target to beat [ done ]
-[2] Detect if the pawn got another piece infront of it and prevent it from moving. [ done ]
+[1] Detect if the pawn got target to beat                                           [ done ]
+[2] Detect if the pawn got another piece infront of it and prevent it from moving.  [ done ]
 [3] Checkmate conditions. 
-[4] Detect which turn is it. [ done ]
-[5] If it's second player turn convert the x numerical using function. [ done ]
-[6] fix auto respawn pawns. [ done ]
-[7] Make the second player logic properly. [ done ]
+[4] Detect which turn is it.                                                        [ done ]
+[5] If it's second player turn convert the x numerical using function.              [ done ]
+[6] fix auto respawn pawns.                                                         [ done ]
+[7] Make the second player logic properly.                                          [ done ]
 [8] Let the user know which boxes he can move to.
 [9] Let the user know which player turn is it.
 [10] Undo button. 
 [11] Move history. 
 [12] in the pawn logic .. in case jumpe two stteps .. if there is a piece infront of it in the first box .. he can't jump through it. [ done ]
 [13] Consider the king movement depending on the checkmate conditions.
+[14] consider all pieces movement if they covering king's checkmate.
 */ 
+
+
+function rookLogic() {
+
+    // determing the direction and breaking if there is a unit between the current position and the destination
+    if (parseInt(xAxis[0]) > parseInt(xAxis[1])) 
+    {
+        for (i = parseInt(xAxis[1]) + 1; i < parseInt(xAxis[0]); i++) {
+            if (piecesNames.some(piecesNames => document.querySelector(`[data-x="${i}"][data-y="${yAxis[0]}"]`).classList.contains(piecesNames))) 
+                valid = "false";
+        }
+    }
+
+    // determing the direction and breaking if there is a unit between the current position and the destination
+    if (parseInt(yAxis[0]) > parseInt(yAxis[1])) 
+    {
+        for (i = parseInt(yAxis[1]) + 1; i < parseInt(yAxis[0]); i++) {
+            if (piecesNames.some(piecesNames => document.querySelector(`[data-x="${xAxis[0]}"][data-y="${i}"]`).classList.contains(piecesNames))) 
+                valid = "false";
+        }
+    }
+
+    // determing the direction and breaking if there is a unit between the current position and the destination
+    if (parseInt(xAxis[0]) < parseInt(xAxis[1])) 
+    {
+        for (i = parseInt(xAxis[0]) + 1; i < parseInt(xAxis[1]); i++) {
+            if (piecesNames.some(piecesNames => document.querySelector(`[data-x="${i}"][data-y="${yAxis[0]}"]`).classList.contains(piecesNames))) 
+                valid = "false";
+        }
+    }
+
+    // determing the direction and breaking if there is a unit between the current position and the destination
+    if (parseInt(yAxis[1]) > parseInt(yAxis[0])) 
+    {
+        for (i = parseInt(yAxis[1]) - 1; i > parseInt(yAxis[0]); i--) {
+            if (piecesNames.some(piecesNames => document.querySelector(`[data-x="${xAxis[0]}"][data-y="${i}"]`).classList.contains(piecesNames))) 
+                valid = "false";
+        }
+    }
+
+    // calling the Movement Function to approve the move
+    if (valid !== "false") movementCheck();
+}
+
+function bishopLogic() {
+
+    stepX = parseInt(xAxis[1]) - parseInt(xAxis[0]);
+    stepY = parseInt(yAxis[1]) - parseInt(yAxis[0]);
+
+    // if it's not a proper move, getout of the conditions. ( Guard clause)
+    if (Math.abs(stepX) !== Math.abs(stepY)) { 
+        return valid= "false", console.log("Error 1");
+    }
+
+    // we got 4 dimensions and giving each dimension it's formula ... sadly. #1
+    if (xAxis[0] > xAxis[1] && yAxis[0] > yAxis[1] ) {
+        for (i = parseInt(xAxis[0]) - 1, y = parseInt(yAxis[0]) - 1 ; i > xAxis[1]; i--, y--) {
+            if (piecesNames.some(piecesNames => document.querySelector(`[data-x="${i}"][data-y="${y}"]`).classList.contains(piecesNames))) 
+                return valid = "false", console.log("Error 2");
+        } 
+    }
+
+    // we got 4 dimensions and giving each dimension it's formula ... sadly. #2
+    if (xAxis[0] > xAxis[1] && yAxis[0] < yAxis[1] ) {
+        for (i = parseInt(xAxis[0]) - 1, y = parseInt(yAxis[0]) + 1 ; i > xAxis[1]; i--, y++) {
+            if (piecesNames.some(piecesNames => document.querySelector(`[data-x="${i}"][data-y="${y}"]`).classList.contains(piecesNames))) 
+                return valid = "false", console.log("Error 3");
+        } 
+    }
+
+    // we got 4 dimensions and giving each dimension it's formula ... sadly. #3
+    if (xAxis[0] < xAxis[1] && yAxis[0] < yAxis[1] ) {
+        for (i = parseInt(xAxis[0]) + 1, y = parseInt(yAxis[0]) + 1 ; i < xAxis[1]; i++, y++) {
+            if (piecesNames.some(piecesNames => document.querySelector(`[data-x="${i}"][data-y="${y}"]`).classList.contains(piecesNames))) 
+                return valid = "false", console.log("Error 4");
+        } 
+    }
+
+    // we got 4 dimensions and giving each dimension it's formula ... sadly. #4
+    if (xAxis[0] < xAxis[1] && yAxis[0] > yAxis[1] ) {
+        for (i = parseInt(xAxis[0]) + 1, y = parseInt(yAxis[0]) - 1 ; i < xAxis[1]; i++, y--) {
+            if (piecesNames.some(piecesNames => document.querySelector(`[data-x="${i}"][data-y="${y}"]`).classList.contains(piecesNames)))
+                return valid = "false", console.log("Error 5");
+        } 
+    }
+
+    // calling the Movement Function to approve the move
+    if (valid !== "false") movementCheck();
+}

@@ -33,6 +33,7 @@
     justify-content: center;
     position: relative;
     cursor: pointer;
+    user-select: none;
 }
 .game .row svg {
     color: #57C5B6;
