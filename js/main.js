@@ -281,7 +281,10 @@ function allLogics() {
         else oneStepForward = - 1, oneStepBackwards = + 1, twoStepsBackwards = + 2;
     
         // moving the pawn one step ahead 
-        if (parseInt(yAxis[0]) + oneStepForward == parseInt(yAxis[1]) && parseInt(xAxis[0]) == parseInt(xAxis[1]))  
+        if (parseInt(yAxis[0]) + oneStepForward == parseInt(yAxis[1]) && parseInt(xAxis[0]) == parseInt(xAxis[1]) &&
+        
+            // making sure no pieces between the current position and the destination  
+            piecesNames.some(piecesNames => document.querySelector(`[data-y="${yAxis[1]}"][data-x="${xAxis[1]}"]`).classList.contains(piecesNames)) == false )
                 movementCheck();
                 
         // moving the pawn two steps ahead 
@@ -296,8 +299,11 @@ function allLogics() {
             parseInt(yAxis[0]) == parseInt(yAxis[1]) + twoStepsBackwards && parseInt(xAxis[0]) == parseInt(xAxis[1]) && 
     
             // making sure no pieces between the current position and the destination  
-            piecesNames.some(piecesNames => document.querySelector(`[data-y="${Math.abs(parseInt(yAxis[1]) - oneStepForward)}"][data-x="${xAxis[1]}"]`).classList.contains(piecesNames)) == false ) 
-                movementCheck();
+            piecesNames.some(piecesNames => document.querySelector(`[data-y="${Math.abs(parseInt(yAxis[1]) - oneStepForward)}"][data-x="${xAxis[1]}"]`).classList.contains(piecesNames)) == false &&
+            
+            // making sure no pieces in the destination position
+            piecesNames.some(piecesNames => document.querySelector(`[data-y="${yAxis[1]}"][data-x="${xAxis[1]}"]`).classList.contains(piecesNames)) == false )
+               movementCheck();
     
         // pawn capturing if there is a opponent piece in the target position
         else if ( parseInt(yAxis[0]) + oneStepForward == parseInt(yAxis[1]) && 
@@ -382,14 +388,15 @@ function allLogics() {
     
         // if it's not a proper move, getout of the conditions. ( Guard clause)
         if (Math.abs(stepX) !== Math.abs(stepY)) {
-            // console.log(`X and Y from BishopLogic: ${xAxis} ${yAxis}`);
-            // console.log(`X and Y from BishopLogic: ${xAxis} ${yAxis}`);
             valid= "false";
         }
     
         // we got 4 dimensions and giving each dimension it's formula ... sadly. #1
         if (xAxis[0] > xAxis[1] && yAxis[0] > yAxis[1] ) {
-            for (i = parseInt(xAxis[0]) - 1, y = parseInt(yAxis[0]) - 1 ; i > xAxis[1]; i--, y--) {
+            
+            for (i = parseInt(xAxis[0]) - 1, y = parseInt(yAxis[0]) - 1 
+            ; i > xAxis[1] && y > yAxis[1]
+            ; i--, y--) {
                 if (piecesNames.some(piecesNames => document.querySelector(`[data-x="${i}"][data-y="${y}"]`).classList.contains(piecesNames))) 
                     valid = "false";
             } 
@@ -397,7 +404,10 @@ function allLogics() {
     
         // we got 4 dimensions and giving each dimension it's formula ... sadly. #2
         if (xAxis[0] > xAxis[1] && yAxis[0] < yAxis[1] ) {
-            for (i = parseInt(xAxis[0]) - 1, y = parseInt(yAxis[0]) + 1 ; i > xAxis[1]; i--, y++) {
+
+            for (i = parseInt(xAxis[0]) - 1, y = parseInt(yAxis[0]) + 1 
+            ; i > xAxis[1] && y < yAxis[1]
+            ; i--, y++) {
                 if (piecesNames.some(piecesNames => document.querySelector(`[data-x="${i}"][data-y="${y}"]`).classList.contains(piecesNames))) 
                     valid = "false";
             } 
@@ -405,7 +415,10 @@ function allLogics() {
     
         // we got 4 dimensions and giving each dimension it's formula ... sadly. #3
         if (xAxis[0] < xAxis[1] && yAxis[0] < yAxis[1] ) {
-            for (i = parseInt(xAxis[0]) + 1, y = parseInt(yAxis[0]) + 1 ; i < xAxis[1]; i++, y++) {
+
+            for (i = parseInt(xAxis[0]) + 1, y = parseInt(yAxis[0]) + 1 
+            ; i < parseInt(xAxis[1]) && y < parseInt(yAxis[1])  
+            ; i++, y++) {
                 if (piecesNames.some(piecesNames => document.querySelector(`[data-x="${i}"][data-y="${y}"]`).classList.contains(piecesNames))) 
                     valid = "false";
             } 
@@ -413,7 +426,10 @@ function allLogics() {
     
         // we got 4 dimensions and giving each dimension it's formula ... sadly. #4
         if (xAxis[0] < xAxis[1] && yAxis[0] > yAxis[1] ) {
-            for (i = parseInt(xAxis[0]) + 1, y = parseInt(yAxis[0]) - 1 ; i < xAxis[1]; i++, y--) {
+
+            for (i = parseInt(xAxis[0]) + 1, y = parseInt(yAxis[0]) - 1 
+            ; i < xAxis[1] && y > parseInt(yAxis[1])
+            ; i++, y--) {
                 if (piecesNames.some(piecesNames => document.querySelector(`[data-x="${i}"][data-y="${y}"]`).classList.contains(piecesNames)))
                     valid = "false";
             } 
