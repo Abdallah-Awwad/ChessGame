@@ -1,34 +1,81 @@
-[1] initiateGame() starts to initiate the game board: 
-    * placing every piece to it's position on the board as it giving every box class with the piece name and the css file places the piece to the UI.
-    * creating spans to let the css file work properly with it's animation to the piece (when moving a piece it gives bounce animation ... ahead in the code).
-    * addEventListener on click and sending which box clicked to move() function.
+Main functions:
+    [1] initiateGame() starts to initiate the game board: 
+        * placing every piece to it's position on the board as it giving every box class with the piece name and the css file places the piece to the UI.
+        * creating spans to let the css file work properly with it's animation to the piece (when moving a piece it gives bounce animation ... ahead in the code).
+        * addEventListener on click and sending which box clicked to move() function.
 
-[2] clickChecker() 
-    (1) if it's the first click from the players:
-        * validating player turn.
-        * running the setXY() function to match the player turn's logic.
-        * checking if the player selected a proper chess piece (not empty box or enemy piece).
-        * giving .selected class to the css to give it a background color.
-        * setting the X and Y value in the Array for the first user selected box.
+    [2] clickChecker() 
+        (1) if it's the first click from the players:
+            * validating player turn.
+            * running the setXY() function to match the player turn's logic.
+            * checking if the player selected a proper chess piece (not empty box or enemy piece).
+            * giving .selected class to the css to give it a background color.
+            * setting the X and Y value in the Array for the first user selected box.
 
-    (2) if it's the second click from the players:
-        * pushing the new clicked box's x-y.  
-        * checking if the second click on the same box and cancels the selection and the array if so.
-        * if not on the same box sending the calling the next function.
+        (2) if it's the second click from the players:
+            * pushing the new clicked box's x-y.  
+            * checking if the second click on the same box and cancels the selection and the array if so.
+            * if not on the same box sending the calling the next function.
 
-[3] moveValidation() 
-    (1) runing detectOpponent() function to check which turn is it and who is the opponent on the current move. 
-    (2) Checking the piece rules and then calling doAnimation(moveType) endTurn(pieceType) function. 
-
-
-
-
-
-
-
+    [3] moveValidation() 
+        (1) runing detectOpponent() function to check which turn is it and who is the opponent on the current move. 
+        (2) Checking the piece rules and then calling doAnimation(moveType) endTurn(pieceType) function. 
 
 
 Side functions: 
-[1] detectOpponent()
-[2] switchCurrentTurn()
-[3] setXY()
+    [1] detectOpponent()
+    [2] switchCurrentTurn()
+    [3] setXY()
+
+
+
+Pieces Logic: 
+
+    Rook Logic:
+        [1] if the x = 4 ,  y = 5  can capture                      [ done ]
+            [1] x = 4               y = [any value]   ==> case #1 
+            [2] x = [any value]     y = 5             ==> case #2 
+        [2] check if there is a piece between the two movements.    [ done ]
+        [3] check if the x1 y1 empty.                               [ done ]            
+        [4] check if the x1 y1 have an opponent piece.              [ done ]
+        [5] check if the x1 y1 have an ally piece.                  [ done ]
+
+    Bishop Logic: 
+        let x[0]  - x[1] = x
+        let  y[0] - y[1] = y  
+        & if x == y 
+        and there is no piece between the current position and the destination.
+        then the bishop can move.
+
+    Knight Logic:
+        if the x = 6 ,  y = 5  can capture
+        [1] x = 5       y = 7   ==> case #1 [ done ]
+        [2] x = 7       y = 7   ==> case #2 [ done ]
+        [3] x = 5       y = 3   ==> case #3 [ done ]
+        [4] x = 7       y = 3   ==> case #4 [ done ]
+        [5] x = 4       y = 4   ==> case #5 [ done ]
+        [6] x = 4       y = 6   ==> case #6 [ done ]
+        [7] x = 8       y = 4   ==> case #7 [ done ]
+        [8] x = 8       y = 6   ==> case #8 [ done ]
+
+    queen Logic:
+        if the x = 4 ,  y = 5  can capture
+        [1] x =        y =    ==> case #1 
+        [2] x =        y =    ==> case #2 
+        [3] x =        y =    ==> case #3 
+        [4] x =        y =    ==> case #4 
+        [5] x =        y =    ==> case #5 
+        [6] x =        y =    ==> case #6 
+        [7] x =        y =    ==> case #7 
+        [8] x =        y =    ==> case #8 
+
+    King Logic:
+        if the x = 4 ,  y = 5  can capture
+        [1] x = 3       y = 6    ==> case #1 
+        [2] x = 4       y = 6    ==> case #2 
+        [3] x = 5       y = 6    ==> case #3 
+        [4] x = 3       y = 5    ==> case #4 
+        [5] x = 5       y = 5    ==> case #5 
+        [6] x = 3       y = 3    ==> case #6 
+        [7] x = 4       y = 3    ==> case #7 
+        [8] x = 5       y = 3    ==> case #8 

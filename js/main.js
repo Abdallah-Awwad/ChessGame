@@ -107,13 +107,9 @@ function clickChecker(box) {
     // if it's first selection 
     if (selectedPieces == 0) {
         
-        // checing which turn is it and rotating the y and x depending on it to make the logic works fine
-        if (box.classList.contains(currentTurn)) {
-            
-        } else {
+        // checing which turn is it.
+        if (box.classList.contains(currentTurn) == false) 
             return console.log("not ur turn") ;
-    
-        } 
         
         // Checking if the box contains a piece
         if (piecesNames.some(piecesNames => box.classList.contains(piecesNames))) {
@@ -122,38 +118,38 @@ function clickChecker(box) {
             box.classList.add("selected");
 
             // giving values to the array
-            yAxis.push(box.getAttribute("data-y"))
-            xAxis.push(box.getAttribute("data-x"))
+            yAxis.push(box.getAttribute("data-y"));
+            xAxis.push(box.getAttribute("data-x"));
 
             selectedPieces++;
+            moveValidation();
+            possibleMovement();
         } 
         
         // if it's second selection 
     } else if (selectedPieces == 1) {
 
         // giving values to the array
-        yAxis.push(box.getAttribute("data-y"))
-        xAxis.push(box.getAttribute("data-x"))
+        yAxis.push(box.getAttribute("data-y"));
+        xAxis.push(box.getAttribute("data-x"));
         
         // checking if the second click on the same box 
         if (yAxis[0] == yAxis[1] && xAxis[0] == xAxis[1]) {
             
             // Cancels the movement and reseting the array 
             document.querySelector(`[data-y="${yAxis[0]}"][data-x="${xAxis[0]}"]`).classList.remove("selected");
-            console.log("Same piece bitch");
             selectedPieces = 0;
+
+            possibleMoveClassRemoval();
             return yAxis = [], xAxis = [];
         } else {
-            // console.log("Data sent to moveValidation");
-            moveValidation();
-
+            chessRules();
         }
     } else {
         console.log("Can't press here now");  
     }
 }
 
-// Start Pieces Logic where y x the current position and x2 y2 the target position
 function moveValidation() {
     // updating the opponent for later use
     detectOpponent();
@@ -164,192 +160,27 @@ function moveValidation() {
             pieceType = piecesNames[i];
         } 
     }
-    
-    chessRules(pieceType);
 }
 
 let oneStepForward, oneStepBackwards, twoStepsBackwards, stepX, stepY, valid, moveType;
 
-function chessRules(pieceType) {
+function chessRules() {
 
     valid ="", moveType = "";
-
-    switch (pieceType) {
-        
-        case "pawn":
-            // since the pawn moves only forward .. checking which turn is it to decide the pawn direction.
-            if (currentTurn == "first-player") oneStepForward = + 1, oneStepBackwards = - 1, twoStepsBackwards = - 2;
-            else if (currentTurn == "second-player") oneStepForward = - 1, oneStepBackwards = + 1, twoStepsBackwards = + 2;
-                        
-                // if the marked box empty
-            if ( piecesNames.some(piecesNames => document.querySelector(`[data-y="${yAxis[1]}"][data-x="${xAxis[1]}"]`).classList.contains(piecesNames)) == false &&
-                // moving the pawn one step ahead 
-                (parseInt(yAxis[0]) + oneStepForward == parseInt(yAxis[1]) && parseInt(xAxis[0]) == parseInt(xAxis[1])) || 
-
-                // if the marked box empty
-                piecesNames.some(piecesNames => document.querySelector(`[data-y="${yAxis[1]}"][data-x="${xAxis[1]}"]`).classList.contains(piecesNames)) == false &&
-                // if it's pawn's first move make it two jumps
-                document.querySelector(`[data-y="${yAxis[0]}"][data-x="${xAxis[0]}"]`).classList.contains("moved") == false &&
-                // making sure no pieces between the current position and the destination  
-                piecesNames.some(piecesNames => document.querySelector
-                    (`[data-y="${Math.abs(parseInt(yAxis[1]) - oneStepForward)}"][data-x="${xAxis[1]}"]`).classList.contains(piecesNames)) == false &&
-
-                // moving the pawn two steps forward
-                parseInt(yAxis[0]) == parseInt(yAxis[1]) + twoStepsBackwards && parseInt(xAxis[0]) == parseInt(xAxis[1]) )            
-            {
-                valid = "true", moveType ="normalMove";
-                break;
-            } 
-
-            // pawn capturing if there is a opponent piece in the target position
-            else if ( parseInt(yAxis[0]) + oneStepForward == parseInt(yAxis[1]) && 
-                document.querySelector(`[data-y="${yAxis[1]}"][data-x="${xAxis[1]}"]`).classList.contains(opponent) == true && 
-                (parseInt(xAxis[0]) + oneStepForward == parseInt(xAxis[1]) || parseInt(xAxis[0]) + oneStepBackwards == parseInt(xAxis[1]) ) ) 
-            {
-                valid ="true", moveType ="capture";
-                break;
-            }
-
-            else {
-                console.log(pieceType);
-                valid ="false";
-                break;
-        }
-            
-        case "bishop":
-
-            bishopLogic();
-            break;
-
-            /* Bishop logic: 
-                let x[0]  - x[1] = x
-                let  y[0] - y[1] = y  
-                & if x == y 
-                and there is no piece between the current position and the destination.
-                then the bishop can move.
-            */
-            
-        case "knight":
-            if ( 
-                parseInt(xAxis[0]) - 1 == parseInt(xAxis[1]) && parseInt(yAxis[0]) + 2 == parseInt(yAxis[1]) || 
-                parseInt(xAxis[0]) + 1 == parseInt(xAxis[1]) && parseInt(yAxis[0]) + 2 == parseInt(yAxis[1]) || 
-                parseInt(xAxis[0]) - 1 == parseInt(xAxis[1]) && parseInt(yAxis[0]) - 2 == parseInt(yAxis[1]) || 
-                parseInt(xAxis[0]) + 1 == parseInt(xAxis[1]) && parseInt(yAxis[0]) - 2 == parseInt(yAxis[1]) || 
-                parseInt(xAxis[0]) - 2 == parseInt(xAxis[1]) && parseInt(yAxis[0]) - 1 == parseInt(yAxis[1]) || 
-                parseInt(xAxis[0]) - 2 == parseInt(xAxis[1]) && parseInt(yAxis[0]) + 1 == parseInt(yAxis[1]) || 
-                parseInt(xAxis[0]) + 2 == parseInt(xAxis[1]) && parseInt(yAxis[0]) - 1 == parseInt(yAxis[1]) || 
-                parseInt(xAxis[0]) + 2 == parseInt(xAxis[1]) && parseInt(yAxis[0]) + 1 == parseInt(yAxis[1])
-                )
-                
-            {
-                movementCheck();
-                break;
-
-            } else { 
-                valid ="false";
-                break;
-            }
-
-            /* Knight Logic:
-            if the x = 6 ,  y = 5  can capture
-            [1] x = 5       y = 7   ==> case #1 [ done ]
-            [2] x = 7       y = 7   ==> case #2 [ done ]
-            [3] x = 5       y = 3   ==> case #3 [ done ]
-            [4] x = 7       y = 3   ==> case #4 [ done ]
-            [5] x = 4       y = 4   ==> case #5 [ done ]
-            [6] x = 4       y = 6   ==> case #6 [ done ]
-            [7] x = 8       y = 4   ==> case #7 [ done ]
-            [8] x = 8       y = 6   ==> case #8 [ done ]
-            */
-
-        case "rook":
-
-        // Guard clauses to remove the unlogical rook movement.
-        if (xAxis[0] !== xAxis[1] && yAxis[0] !== yAxis[1] ) 
-            valid = "false";
-
-        else rookLogic();
-            
-        break;
-        
-            /* rook Logic:
-            [1] if the x = 4 ,  y = 5  can capture                      [ done ]
-                [1] x = 4               y = [any value]   ==> case #1 
-                [2] x = [any value]     y = 5             ==> case #2 
-            [2] check if there is a piece between the two movements.    [ done ]
-            [3] check if the x1 y1 empty.                               [ done ]            
-            [4] check if the x1 y1 have an opponent piece.              [ done ]
-            [5] check if the x1 y1 have an ally piece.                  [ done ]
-            */
-
-        case "queen":
-
-            // if it's a rook movement call the rookLogic(), else call bishopLogic()
-            if ( (xAxis[0] == xAxis[1] || yAxis[0] == yAxis[1]) ) {
-                rookLogic();
-                console.log("Rook Move");
-
-            }
-            else bishopLogic(), console.log("BishopLogic");
-
-            break;
-    
-            /* queen Logic:
-            if the x = 4 ,  y = 5  can capture
-            [1] x =        y =    ==> case #1 
-            [2] x =        y =    ==> case #2 
-            [3] x =        y =    ==> case #3 
-            [4] x =        y =    ==> case #4 
-            [5] x =        y =    ==> case #5 
-            [6] x =        y =    ==> case #6 
-            [7] x =        y =    ==> case #7 
-            [8] x =        y =    ==> case #8 
-            */
-
-
-        case "king":
-            if ( 
-                // if it moved one step diagonally
-                Math.abs( parseInt(xAxis[0]) - parseInt(xAxis[1]) ) == 1 && 
-                Math.abs( parseInt(yAxis[0]) - parseInt(yAxis[1]) ) == 1  || 
-
-                // if it moved one step vertically
-                Math.abs( parseInt(xAxis[0]) - parseInt(xAxis[1]) ) == 1 && 
-                Math.abs( parseInt(yAxis[0]) - parseInt(yAxis[1]) ) == 0 || 
-                
-                // if it moved one step horizontally
-                Math.abs( parseInt(xAxis[0]) - parseInt(xAxis[1]) ) == 0 && 
-                Math.abs( parseInt(yAxis[0]) - parseInt(yAxis[1]) ) == 1
-
-                )
-                movementCheck();
-
-            break;
-
-            /* King Logic:
-            if the x = 4 ,  y = 5  can capture
-            [1] x = 3       y = 6    ==> case #1 
-            [2] x = 4       y = 6    ==> case #2 
-            [3] x = 5       y = 6    ==> case #3 
-            [4] x = 3       y = 5    ==> case #4 
-            [5] x = 5       y = 5    ==> case #5 
-            [6] x = 3       y = 3    ==> case #6 
-            [7] x = 4       y = 3    ==> case #7 
-            [8] x = 5       y = 3    ==> case #8 
-            */
-    }
+    allLogics();
 
     // what happens after the switch cases
     if (valid == "true") {
+
+        possibleMoveClassRemoval();
         doAnimation(moveType);
         endTurn(pieceType);
+
     } else {
-        console.log("Faaaalse .... etsrf");
+        console.log(`the ${pieceType} can't move like this, idiot!`);
         return yAxis.pop(),xAxis.pop();
     } 
 }
-
-// End Pieces Logic
 
 function movementCheck() {
     
@@ -414,6 +245,244 @@ function doAnimation(animationType) {
     }, "1000");
 }
 
+function allLogics() {
+
+    switch (pieceType) {
+        
+        case "pawn":
+            pawnLogic();
+            break;
+            
+        case "rook":
+            rookLogic();
+            break;
+
+        case "knight":
+            knightLogic();
+            break;
+
+        case "bishop":
+            bishopLogic();
+            break;
+
+        case "queen":
+            queenLogic();
+            break;
+    
+        case "king":
+            kingLogic();
+            break;
+    }
+
+    function pawnLogic() {
+    
+        // since the pawn moves only forward .. checking which turn is it to decide the pawn direction.
+        if (currentTurn == "first-player") oneStepForward = + 1, oneStepBackwards = - 1, twoStepsBackwards = - 2;
+        else oneStepForward = - 1, oneStepBackwards = + 1, twoStepsBackwards = + 2;
+    
+        // moving the pawn one step ahead 
+        if (parseInt(yAxis[0]) + oneStepForward == parseInt(yAxis[1]) && parseInt(xAxis[0]) == parseInt(xAxis[1]))  
+                movementCheck();
+                
+        // moving the pawn two steps ahead 
+        else if (
+            // to avoid searching out of the board (for example: y = -1)
+            (parseInt(yAxis[1]) > 0 && parseInt(xAxis[1]) > 0 ) && 
+            
+            // if it's pawn's first move
+            document.querySelector(`[data-y="${yAxis[0]}"][data-x="${xAxis[0]}"]`).classList.contains("moved") == false  &&
+    
+            // checking if it's two steps forward
+            parseInt(yAxis[0]) == parseInt(yAxis[1]) + twoStepsBackwards && parseInt(xAxis[0]) == parseInt(xAxis[1]) && 
+    
+            // making sure no pieces between the current position and the destination  
+            piecesNames.some(piecesNames => document.querySelector(`[data-y="${Math.abs(parseInt(yAxis[1]) - oneStepForward)}"][data-x="${xAxis[1]}"]`).classList.contains(piecesNames)) == false ) 
+                movementCheck();
+    
+        // pawn capturing if there is a opponent piece in the target position
+        else if ( parseInt(yAxis[0]) + oneStepForward == parseInt(yAxis[1]) && 
+            document.querySelector(`[data-y="${yAxis[1]}"][data-x="${xAxis[1]}"]`).classList.contains(opponent) == true && 
+            (parseInt(xAxis[0]) + oneStepForward == parseInt(xAxis[1]) || parseInt(xAxis[0]) + oneStepBackwards == parseInt(xAxis[1]) ) ) 
+            movementCheck();
+    
+        else valid ="false";
+    }
+
+    function rookLogic() {
+    
+        // Guard clauses to remove the unlogical rook movement.
+        if (xAxis[0] !== xAxis[1] && yAxis[0] !== yAxis[1] ) 
+        valid = "false";
+    
+    
+        // determing the direction and breaking if there is a unit between the current position and the destination
+        if (parseInt(xAxis[0]) > parseInt(xAxis[1])) 
+        {
+            for (i = parseInt(xAxis[1]) + 1; i < parseInt(xAxis[0]); i++) {
+                if (piecesNames.some(piecesNames => document.querySelector(`[data-x="${i}"][data-y="${yAxis[0]}"]`).classList.contains(piecesNames))) 
+                    valid = "false";
+            }
+        }
+    
+        // determing the direction and breaking if there is a unit between the current position and the destination
+        if (parseInt(yAxis[0]) > parseInt(yAxis[1])) 
+        {
+            for (i = parseInt(yAxis[1]) + 1; i < parseInt(yAxis[0]); i++) {
+                if (piecesNames.some(piecesNames => document.querySelector(`[data-x="${xAxis[0]}"][data-y="${i}"]`).classList.contains(piecesNames))) 
+                    valid = "false";
+            }
+        }
+    
+        // determing the direction and breaking if there is a unit between the current position and the destination
+        if (parseInt(xAxis[0]) < parseInt(xAxis[1])) 
+        {
+            for (i = parseInt(xAxis[0]) + 1; i < parseInt(xAxis[1]); i++) {
+                if (piecesNames.some(piecesNames => document.querySelector(`[data-x="${i}"][data-y="${yAxis[0]}"]`).classList.contains(piecesNames))) 
+                    valid = "false";
+            }
+        }
+    
+        // determing the direction and breaking if there is a unit between the current position and the destination
+        if (parseInt(yAxis[1]) > parseInt(yAxis[0])) 
+        {
+            for (i = parseInt(yAxis[1]) - 1; i > parseInt(yAxis[0]); i--) {
+                if (piecesNames.some(piecesNames => document.querySelector(`[data-x="${xAxis[0]}"][data-y="${i}"]`).classList.contains(piecesNames))) 
+                    valid = "false";
+            }
+        }
+    
+        // calling the Movement Function to approve the move
+        if (valid !== "false") movementCheck();
+    }
+    
+    function knightLogic() {
+        if ( 
+            parseInt(xAxis[0]) - 1 == parseInt(xAxis[1]) && parseInt(yAxis[0]) + 2 == parseInt(yAxis[1]) || 
+            parseInt(xAxis[0]) + 1 == parseInt(xAxis[1]) && parseInt(yAxis[0]) + 2 == parseInt(yAxis[1]) || 
+            parseInt(xAxis[0]) - 1 == parseInt(xAxis[1]) && parseInt(yAxis[0]) - 2 == parseInt(yAxis[1]) || 
+            parseInt(xAxis[0]) + 1 == parseInt(xAxis[1]) && parseInt(yAxis[0]) - 2 == parseInt(yAxis[1]) || 
+            parseInt(xAxis[0]) - 2 == parseInt(xAxis[1]) && parseInt(yAxis[0]) - 1 == parseInt(yAxis[1]) || 
+            parseInt(xAxis[0]) - 2 == parseInt(xAxis[1]) && parseInt(yAxis[0]) + 1 == parseInt(yAxis[1]) || 
+            parseInt(xAxis[0]) + 2 == parseInt(xAxis[1]) && parseInt(yAxis[0]) - 1 == parseInt(yAxis[1]) || 
+            parseInt(xAxis[0]) + 2 == parseInt(xAxis[1]) && parseInt(yAxis[0]) + 1 == parseInt(yAxis[1])
+            )
+            
+        {
+            movementCheck();
+    
+        } else { 
+            valid ="false";
+        }
+    }
+
+    function bishopLogic() {
+    
+        stepX = parseInt(xAxis[1]) - parseInt(xAxis[0]);
+        stepY = parseInt(yAxis[1]) - parseInt(yAxis[0]);
+    
+        // if it's not a proper move, getout of the conditions. ( Guard clause)
+        if (Math.abs(stepX) !== Math.abs(stepY)) {
+            // console.log(`X and Y from BishopLogic: ${xAxis} ${yAxis}`);
+            // console.log(`X and Y from BishopLogic: ${xAxis} ${yAxis}`);
+            valid= "false";
+        }
+    
+        // we got 4 dimensions and giving each dimension it's formula ... sadly. #1
+        if (xAxis[0] > xAxis[1] && yAxis[0] > yAxis[1] ) {
+            for (i = parseInt(xAxis[0]) - 1, y = parseInt(yAxis[0]) - 1 ; i > xAxis[1]; i--, y--) {
+                if (piecesNames.some(piecesNames => document.querySelector(`[data-x="${i}"][data-y="${y}"]`).classList.contains(piecesNames))) 
+                    valid = "false";
+            } 
+        }
+    
+        // we got 4 dimensions and giving each dimension it's formula ... sadly. #2
+        if (xAxis[0] > xAxis[1] && yAxis[0] < yAxis[1] ) {
+            for (i = parseInt(xAxis[0]) - 1, y = parseInt(yAxis[0]) + 1 ; i > xAxis[1]; i--, y++) {
+                if (piecesNames.some(piecesNames => document.querySelector(`[data-x="${i}"][data-y="${y}"]`).classList.contains(piecesNames))) 
+                    valid = "false";
+            } 
+        }
+    
+        // we got 4 dimensions and giving each dimension it's formula ... sadly. #3
+        if (xAxis[0] < xAxis[1] && yAxis[0] < yAxis[1] ) {
+            for (i = parseInt(xAxis[0]) + 1, y = parseInt(yAxis[0]) + 1 ; i < xAxis[1]; i++, y++) {
+                if (piecesNames.some(piecesNames => document.querySelector(`[data-x="${i}"][data-y="${y}"]`).classList.contains(piecesNames))) 
+                    valid = "false";
+            } 
+        }
+    
+        // we got 4 dimensions and giving each dimension it's formula ... sadly. #4
+        if (xAxis[0] < xAxis[1] && yAxis[0] > yAxis[1] ) {
+            for (i = parseInt(xAxis[0]) + 1, y = parseInt(yAxis[0]) - 1 ; i < xAxis[1]; i++, y--) {
+                if (piecesNames.some(piecesNames => document.querySelector(`[data-x="${i}"][data-y="${y}"]`).classList.contains(piecesNames)))
+                    valid = "false";
+            } 
+        }
+    
+        // calling the Movement Function to approve the move
+        if (valid !== "false") movementCheck();
+    }
+    
+    function queenLogic() {
+        // if it's a rook movement call the rookLogic(), else call bishopLogic()
+        if ( (xAxis[0] == xAxis[1] || yAxis[0] == yAxis[1]) ) 
+            rookLogic();
+        else bishopLogic();
+    }
+    
+    function kingLogic() {
+        if ( 
+            // if it moved one step diagonally
+            Math.abs( parseInt(xAxis[0]) - parseInt(xAxis[1]) ) == 1 && 
+            Math.abs( parseInt(yAxis[0]) - parseInt(yAxis[1]) ) == 1  || 
+    
+            // if it moved one step vertically
+            Math.abs( parseInt(xAxis[0]) - parseInt(xAxis[1]) ) == 1 && 
+            Math.abs( parseInt(yAxis[0]) - parseInt(yAxis[1]) ) == 0 || 
+            
+            // if it moved one step horizontally
+            Math.abs( parseInt(xAxis[0]) - parseInt(xAxis[1]) ) == 0 && 
+            Math.abs( parseInt(yAxis[0]) - parseInt(yAxis[1]) ) == 1
+    
+            )
+            movementCheck();
+        else valid = "false";
+    }
+}
+
+// Letting the player know which boxes he can move on when clicking on a piece
+function possibleMovement() {
+    let z = 0;
+    for (let y = 8; y > 0; y--) {
+        for (x = 1; x < 9; x++) {
+
+            // giving values to the array
+            xAxis.push(boxes[z].getAttribute("data-x"));
+            yAxis.push(boxes[z].getAttribute("data-y"));
+
+            // reseting valid value
+            valid = "";
+            
+            allLogics();
+            if (valid !== "false") {
+                boxes[z].classList.add("possible-move");
+            }
+            yAxis.pop(), xAxis.pop();
+            z++;
+        }
+    }
+}
+
+function possibleMoveClassRemoval() {
+    // removing the possible-move class from the board 
+    let removeCLass = document.getElementsByClassName("possible-move");
+    for (;removeCLass.length > 0;) {
+        for (i = 0; i < removeCLass.length; i++) {
+            removeCLass[0].classList.remove("possible-move");
+        }
+    }
+}
+
 /* 
 Things to do : 
 [1] Detect if the pawn got target to beat                                           [ done ]
@@ -431,92 +500,3 @@ Things to do :
 [13] Consider the king movement depending on the checkmate conditions.
 [14] consider all pieces movement if they covering king's checkmate.
 */ 
-
-
-function rookLogic() {
-
-    // determing the direction and breaking if there is a unit between the current position and the destination
-    if (parseInt(xAxis[0]) > parseInt(xAxis[1])) 
-    {
-        for (i = parseInt(xAxis[1]) + 1; i < parseInt(xAxis[0]); i++) {
-            if (piecesNames.some(piecesNames => document.querySelector(`[data-x="${i}"][data-y="${yAxis[0]}"]`).classList.contains(piecesNames))) 
-                valid = "false";
-        }
-    }
-
-    // determing the direction and breaking if there is a unit between the current position and the destination
-    if (parseInt(yAxis[0]) > parseInt(yAxis[1])) 
-    {
-        for (i = parseInt(yAxis[1]) + 1; i < parseInt(yAxis[0]); i++) {
-            if (piecesNames.some(piecesNames => document.querySelector(`[data-x="${xAxis[0]}"][data-y="${i}"]`).classList.contains(piecesNames))) 
-                valid = "false";
-        }
-    }
-
-    // determing the direction and breaking if there is a unit between the current position and the destination
-    if (parseInt(xAxis[0]) < parseInt(xAxis[1])) 
-    {
-        for (i = parseInt(xAxis[0]) + 1; i < parseInt(xAxis[1]); i++) {
-            if (piecesNames.some(piecesNames => document.querySelector(`[data-x="${i}"][data-y="${yAxis[0]}"]`).classList.contains(piecesNames))) 
-                valid = "false";
-        }
-    }
-
-    // determing the direction and breaking if there is a unit between the current position and the destination
-    if (parseInt(yAxis[1]) > parseInt(yAxis[0])) 
-    {
-        for (i = parseInt(yAxis[1]) - 1; i > parseInt(yAxis[0]); i--) {
-            if (piecesNames.some(piecesNames => document.querySelector(`[data-x="${xAxis[0]}"][data-y="${i}"]`).classList.contains(piecesNames))) 
-                valid = "false";
-        }
-    }
-
-    // calling the Movement Function to approve the move
-    if (valid !== "false") movementCheck();
-}
-
-function bishopLogic() {
-
-    stepX = parseInt(xAxis[1]) - parseInt(xAxis[0]);
-    stepY = parseInt(yAxis[1]) - parseInt(yAxis[0]);
-
-    // if it's not a proper move, getout of the conditions. ( Guard clause)
-    if (Math.abs(stepX) !== Math.abs(stepY)) { 
-        return valid= "false", console.log("Error 1");
-    }
-
-    // we got 4 dimensions and giving each dimension it's formula ... sadly. #1
-    if (xAxis[0] > xAxis[1] && yAxis[0] > yAxis[1] ) {
-        for (i = parseInt(xAxis[0]) - 1, y = parseInt(yAxis[0]) - 1 ; i > xAxis[1]; i--, y--) {
-            if (piecesNames.some(piecesNames => document.querySelector(`[data-x="${i}"][data-y="${y}"]`).classList.contains(piecesNames))) 
-                return valid = "false", console.log("Error 2");
-        } 
-    }
-
-    // we got 4 dimensions and giving each dimension it's formula ... sadly. #2
-    if (xAxis[0] > xAxis[1] && yAxis[0] < yAxis[1] ) {
-        for (i = parseInt(xAxis[0]) - 1, y = parseInt(yAxis[0]) + 1 ; i > xAxis[1]; i--, y++) {
-            if (piecesNames.some(piecesNames => document.querySelector(`[data-x="${i}"][data-y="${y}"]`).classList.contains(piecesNames))) 
-                return valid = "false", console.log("Error 3");
-        } 
-    }
-
-    // we got 4 dimensions and giving each dimension it's formula ... sadly. #3
-    if (xAxis[0] < xAxis[1] && yAxis[0] < yAxis[1] ) {
-        for (i = parseInt(xAxis[0]) + 1, y = parseInt(yAxis[0]) + 1 ; i < xAxis[1]; i++, y++) {
-            if (piecesNames.some(piecesNames => document.querySelector(`[data-x="${i}"][data-y="${y}"]`).classList.contains(piecesNames))) 
-                return valid = "false", console.log("Error 4");
-        } 
-    }
-
-    // we got 4 dimensions and giving each dimension it's formula ... sadly. #4
-    if (xAxis[0] < xAxis[1] && yAxis[0] > yAxis[1] ) {
-        for (i = parseInt(xAxis[0]) + 1, y = parseInt(yAxis[0]) - 1 ; i < xAxis[1]; i++, y--) {
-            if (piecesNames.some(piecesNames => document.querySelector(`[data-x="${i}"][data-y="${y}"]`).classList.contains(piecesNames)))
-                return valid = "false", console.log("Error 5");
-        } 
-    }
-
-    // calling the Movement Function to approve the move
-    if (valid !== "false") movementCheck();
-}
