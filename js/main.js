@@ -23,6 +23,15 @@ function detectOpponent() {
     currentTurn == "first-player" ? opponent = "second-player" : opponent = "first-player";
 }
 
+function pieceTypeDetection() {
+    // Checking which piece is it so we can call it's rules function
+    for (i = 0; i < piecesNames.length; i++) {
+        if (document.querySelector(`[data-y="${yAxis[0]}"][data-x="${xAxis[0]}"]`).classList.contains(piecesNames[i])) {
+            pieceType = piecesNames[i];
+        } 
+    }
+}
+
 // give data-y and data-x to every box in the board to identify them using js
 function setXY() {
     let z = 0;
@@ -101,7 +110,7 @@ function initiateGame() {
 
 initiateGame();
 
-// when clicking get me the y and x from the piece
+// when clicking get me the x and y from the piece
 function clickChecker(box) {
     
     // if it's first selection 
@@ -122,7 +131,8 @@ function clickChecker(box) {
             xAxis.push(box.getAttribute("data-x"));
 
             selectedPieces++;
-            moveValidation();
+            detectOpponent();
+            pieceTypeDetection();
             possibleMovement();
         } 
         
@@ -145,66 +155,39 @@ function clickChecker(box) {
         } else {
             chessRules();
         }
+
     } else {
         console.log("Can't press here now");  
-    }
-}
-
-function moveValidation() {
-    // updating the opponent for later use
-    detectOpponent();
-    
-    // Checking which piece is it so we can call it's rules function
-    for (i = 0; i < piecesNames.length; i++) {
-        if (document.querySelector(`[data-y="${yAxis[0]}"][data-x="${xAxis[0]}"]`).classList.contains(piecesNames[i])) {
-            pieceType = piecesNames[i];
-        } 
     }
 }
 
 let oneStepForward, oneStepBackwards, twoStepsBackwards, stepX, stepY, valid, moveType;
 
 function chessRules() {
-
     valid ="", moveType = "";
     allLogics();
 
-    // what happens after the switch cases
+    // if allLogics() approves the move 
     if (valid == "true") {
-
+        
         possibleMoveClassRemoval();
         doAnimation(moveType);
         endTurn(pieceType);
-
+        checkmate();
+        switchCurrentTurn();
+        
     } else {
-        console.log(`the ${pieceType} can't move like this, idiot!`);
+        console.log(`The ${pieceType} can't move like this!`);
         return yAxis.pop(),xAxis.pop();
     } 
 }
 
-function movementCheck() {
-    
-    // if the next move contains an ally piece.
-    if (document.querySelector(`[data-y="${yAxis[1]}"][data-x="${xAxis[1]}"]`).classList.contains(currentTurn)) 
-        valid = "false";
-
-    // if the destination position empty ==> move 
-    if (piecesNames.some(piecesNames => document.querySelector(`[data-x="${xAxis[1]}"][data-y="${yAxis[1]}"]`).classList.contains(piecesNames)) == false) 
-        valid = "true", moveType = "normalMove";
-
-    // if the destination position has enemy ==> move 
-    if (document.querySelector(`[data-x="${xAxis[1]}"][data-y="${yAxis[1]}"]`).classList.contains(opponent) == true) 
-        valid = "true", moveType = "capture";
-}
-
-// End Turn function 
 function endTurn(piece) {
     selectedPieces = 0;
 
     // preventing player from pressing till the animation done
     document.body.style.pointerEvents="none";
     
-    // Start Moving the piece 
     // Removing classes from the current position
     document.querySelector(`[data-y="${yAxis[0]}"][data-x="${xAxis[0]}"]`).classList.remove(piece, currentTurn);
     document.querySelector(`[data-y="${yAxis[0]}"][data-x="${xAxis[0]}"]`).classList.remove("moved");
@@ -216,8 +199,6 @@ function endTurn(piece) {
     document.querySelector(`[data-y="${yAxis[1]}"][data-x="${xAxis[1]}"]`).classList.add(piece, currentTurn, "second-choice");
     document.querySelector(`[data-y="${yAxis[1]}"][data-x="${xAxis[1]}"]`).classList.add("moved");
 
-    // End Moving the piece 
-
     // Ending the turn and clear selections
     setTimeout(() => {
         document.querySelector(".selected").classList.remove("selected");
@@ -227,15 +208,23 @@ function endTurn(piece) {
         document.body.style.pointerEvents="initial";
     }, "1000");
 
-    switchCurrentTurn();
-
-    return yAxis = [], xAxis = [];
+    pieceType = "";
 }
+
+// declaring audio files
+let captureSound = new Audio('audio/captureSound.mp3'), moveSound = new Audio('audio/moveSound.mp3'), checkmateSound = new Audio('audio/checkmateSound.mp3');
 
 // Making animation when a piece moves
 function doAnimation(animationType) {
     // detecting if it's capture move or normal move to determine the animationtype 
-    animationType == "normalMove" ? animationType = "fa-bounce" : animationType = "fa-beat";
+    if (animationType == "normalMove") {
+        animationType = "fa-bounce";
+        moveSound.play();
+        
+    } else {
+         animationType = "fa-beat";
+         captureSound.play();
+    }
     
     document.querySelector(`[data-y="${yAxis[1]}"][data-x="${xAxis[1]}"] span`).classList.add(animationType);
     
@@ -243,6 +232,21 @@ function doAnimation(animationType) {
         document.querySelector(`.${animationType}`).classList.remove(animationType);
         
     }, "1000");
+}
+
+function nextMoveChecker() {
+    
+    // if the next move contains an ally piece.
+    if (document.querySelector(`[data-y="${yAxis[1]}"][data-x="${xAxis[1]}"]`).classList.contains(currentTurn))
+        valid = "false";
+
+    // if the next move position empty ==> move 
+    if (piecesNames.some(piecesNames => document.querySelector(`[data-x="${xAxis[1]}"][data-y="${yAxis[1]}"]`).classList.contains(piecesNames)) == false) 
+        valid = "true", moveType = "normalMove";
+
+    // if the next move position has enemy ==> move 
+    if (document.querySelector(`[data-x="${xAxis[1]}"][data-y="${yAxis[1]}"]`).classList.contains(opponent) == true) 
+        valid = "true", moveType = "capture";
 }
 
 function allLogics() {
@@ -285,7 +289,7 @@ function allLogics() {
         
             // making sure no pieces between the current position and the destination  
             piecesNames.some(piecesNames => document.querySelector(`[data-y="${yAxis[1]}"][data-x="${xAxis[1]}"]`).classList.contains(piecesNames)) == false )
-                movementCheck();
+                nextMoveChecker();
                 
         // moving the pawn two steps ahead 
         else if (
@@ -303,13 +307,13 @@ function allLogics() {
             
             // making sure no pieces in the destination position
             piecesNames.some(piecesNames => document.querySelector(`[data-y="${yAxis[1]}"][data-x="${xAxis[1]}"]`).classList.contains(piecesNames)) == false )
-               movementCheck();
+               nextMoveChecker();
     
         // pawn capturing if there is a opponent piece in the target position
         else if ( parseInt(yAxis[0]) + oneStepForward == parseInt(yAxis[1]) && 
             document.querySelector(`[data-y="${yAxis[1]}"][data-x="${xAxis[1]}"]`).classList.contains(opponent) == true && 
             (parseInt(xAxis[0]) + oneStepForward == parseInt(xAxis[1]) || parseInt(xAxis[0]) + oneStepBackwards == parseInt(xAxis[1]) ) ) 
-            movementCheck();
+            nextMoveChecker();
     
         else valid ="false";
     }
@@ -358,7 +362,7 @@ function allLogics() {
         }
     
         // calling the Movement Function to approve the move
-        if (valid !== "false") movementCheck();
+        if (valid !== "false") nextMoveChecker();
     }
     
     function knightLogic() {
@@ -374,7 +378,7 @@ function allLogics() {
             )
             
         {
-            movementCheck();
+            nextMoveChecker();
     
         } else { 
             valid ="false";
@@ -436,7 +440,7 @@ function allLogics() {
         }
     
         // calling the Movement Function to approve the move
-        if (valid !== "false") movementCheck();
+        if (valid !== "false") nextMoveChecker();
     }
     
     function queenLogic() {
@@ -461,7 +465,7 @@ function allLogics() {
             Math.abs( parseInt(yAxis[0]) - parseInt(yAxis[1]) ) == 1
     
             )
-            movementCheck();
+            nextMoveChecker();
         else valid = "false";
     }
 }
@@ -499,6 +503,61 @@ function possibleMoveClassRemoval() {
     }
 }
 
+function checkmate() {
+    // removing old x & y
+    yAxis = [], xAxis = [];
+    valid = "";
+    detectOpponent();
+    
+    let z = 0;
+    for (let y = 8; y > 0; y--) {
+        for (x = 1; x < 9; x++) {
+            
+            // giving values to the array
+            xAxis.unshift(boxes[z].getAttribute("data-x"));
+            yAxis.unshift(boxes[z].getAttribute("data-y"));
+            
+            if (document.querySelector(`[data-x="${xAxis[0]}"][data-y="${yAxis[0]}"]`).classList.contains(currentTurn) == true ) 
+            {
+                // adding the opponent king coordinates
+                xAxis.push(document.querySelector(`.king.${opponent}`).getAttribute("data-x"));
+                yAxis.push(document.querySelector(`.king.${opponent}`).getAttribute("data-y"));
+                
+                valid = "";
+                pieceTypeDetection();
+                allLogics();
+            } 
+
+            if (document.querySelector(`[data-x="${xAxis[0]}"][data-y="${yAxis[0]}"]`).classList.contains(opponent) == true ) 
+            {
+                // adding the opponent king coordinates
+                xAxis.push(document.querySelector(`.king.${currentTurn}`).getAttribute("data-x"));
+                yAxis.push(document.querySelector(`.king.${currentTurn}`).getAttribute("data-y"));
+                
+                switchCurrentTurn();
+                detectOpponent();
+                valid = "";
+                pieceTypeDetection();
+                allLogics();
+                switchCurrentTurn();
+                detectOpponent();
+            } 
+            
+            if (valid == "true") {
+
+                console.log(`${pieceType} at ${xAxis[0]} , ${yAxis[0]} made checkmate on the ${xAxis[1]} , ${yAxis[1]}`);
+                checkmateSound.play();
+
+                // reseting valid value
+                valid = "";
+            }
+            xAxis = [], yAxis = [];
+            z++;
+        }
+    }
+    return yAxis = [], xAxis = [];
+}
+
 /* 
 Things to do : 
 [1] Detect if the pawn got target to beat                                           [ done ]
@@ -508,11 +567,14 @@ Things to do :
 [5] If it's second player turn convert the x numerical using function.              [ done ]
 [6] fix auto respawn pawns.                                                         [ done ]
 [7] Make the second player logic properly.                                          [ done ]
-[8] Let the user know which boxes he can move to.
+[8] Let the user know which boxes he can move to.                                   [ done ]
 [9] Let the user know which player turn is it.
 [10] Undo button. 
 [11] Move history. 
 [12] in the pawn logic .. in case jumpe two stteps .. if there is a piece infront of it in the first box .. he can't jump through it. [ done ]
 [13] Consider the king movement depending on the checkmate conditions.
 [14] consider all pieces movement if they covering king's checkmate.
+[15] Castling (Rook and king move).
+[16] Pawn promotion when reaches the other side of the board. 
+[17] when a selected piece selected .. and the player pressed on another piece from it's pieces. you switch the focus to the new piece, instead of saying wrong move.
 */ 
